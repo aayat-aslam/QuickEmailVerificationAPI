@@ -1,0 +1,10 @@
+{
+    "name": "aslamansari/verify-email",
+    "authors": [{
+        "name": "aslamansari",
+        "email": "aslam.ansari@bda.media"
+    }],
+    "require": {
+        "quickemailverification/quickemailverification": "*"
+    }
+}
