@@ -1,8 +1,8 @@
 {
-    "name": "aslamansari/verify-email",
+    "name": "aslam_ansari/verify-email",
     "authors": [{
-        "name": "aslamansari",
-        "email": "aslam.ansari@bda.media"
+        "name": "aslam_ansari",
+        "email": "www.aslam004@gmail.com"
     }],
     "require": {
         "quickemailverification/quickemailverification": "*"

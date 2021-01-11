@@ -30,13 +30,11 @@ class QuickEmailVerification {
      * @email String
      */
     public function verify($email) {
-        //return $this->endpoint;
         try {
             $client = new QuickEmailVerification\Client( $this->apiKey ); // Replace API_KEY with your API Key
-            $quickemailverification = $client->quickemailverification();
-            $response = $quickemailverification->verify($email); // Email address which need to be verified
-            return $response;
-            // return $this->decodeValidation( $response );
+            $quickEmailVerification = $client->quickemailverification();
+            $response = $quickEmailVerification->verify($email); // Email address which need to be verified
+            return $this->decodeValidation( json_decode(json_encode($response), true) );
         } catch (Exception $e) {
             // print_r( $e->getMessage() . ' | ' . $e->getCode() );
             return $this->processHttpCode( $e->getCode() ); // any code other than 200 (say)
@@ -52,24 +50,22 @@ class QuickEmailVerification {
     }
 
     private function decodeValidation($qev_object) {
-        
-        // $this->processHttpCode($qev_object['code']); // for other than 200
-        $remaining_messages = $this->remainingCost($qev_object['header']);
+
+        $remaining_messages = $this->remainingCost($qev_object['headers']);
         
         if( $qev_object['body']['result'] == 'valid' ) { // positive
-
             $trueOfFalse = true;
-
-            if( false ) { // false positive detected
+            //Check if API return email as valid but still email is not valid.
+            if( $qev_object['body']['did_you_mean'] ) { // false positive detected
                 $trueOfFalse = false;
+                $message = "Invalid email address.<br> Did you mean <u>('".$qev_object['body']['did_you_mean']."')</u>";
             }
-
             return [
                 "success" => $trueOfFalse,
-                "message" => ($trueOfFalse == true) ? "valid email address" : "invalid email address",
+                "message" => ($trueOfFalse == true) ? "Valid email address" : $message,
                 "remaining messages" => $remaining_messages,
             ];
-        } else { # negative
+        } else { // negative
 
             $err = $this->processBody($qev_object['body']);
 
@@ -78,19 +74,17 @@ class QuickEmailVerification {
             }
     
             return [
-                "success" => TRUE,
-                "message" => "",
+                "success" => FALSE,
+                "message" => $err['message'],
                 "remaining messages" => $remaining_messages,
-                "err" => $err
             ];
 
         }
-        
-        
     }
     
     /**
-     * Function will process all situation related to QuickEmailVerification object response http code
+     * Function will process all situation related to QuickEmailVerification
+     * object response http code
      */
     private function processHttpCode($qev_object_code) {
 
@@ -188,43 +182,10 @@ class QuickEmailVerification {
      * Source: http://docs.quickemailverification.com/getting-started/understanding-email-verification-result
      */
     private function processBody($qev_object_body) {
-        
-        /*
-        switch ($qev_object_body['result']) {
-            case 'invalid':
-                # code...
-                break;
-
-            case 'unknown':
-                # code...
-                break;
-            
-            default:
-                # code...
-                break;
-        }
-        */
-
-        /*
-
-        Invalid_email	The syntax of the email address is invalid (Is not according to RFC standards).
-        Invalid_domain	The domain used in an email address doesn't exist.
-        rejected_email	SMTP server rejected email. Email account doesn't exist on receiving server.
-        accepted_email	SMTP server accepted email.
-        no_connect	Could not connect to receiving SMTP server.
-        timeout	Session timeout occurred on the remote SMTP server. It happens when the receiving mail server is responding too slow.
-        unavailable_smtp	Receiving SMTP server was not available to process a request.
-        unexpected_error	Some unexpected error has occurred on the receiving SMTP server.
-        no_mx_record	MX record of the domain doesn’t exist. // part of DNS record
-        temporarily_blocked	Email address is temporary greylisted.
-        exceeded_storage	Email account on receiving server has exceeded storage allocation.
-
-        */
 
         $error = [
             'final_validity' => false,
         ];
-
 
         switch ($qev_object_body['reason']) {
             
@@ -272,28 +233,7 @@ class QuickEmailVerification {
                 $error['message'] = 'invalid email address, please check';
                 break;
         }
-
-
-
-
-        
-        
-        
-        //     [success]  => invalid
-        //     [reason] => invalid_email
-        //     [disposable] => false
-        //     [accept_all] => false
-        //     [role] => false
-        //     [free] => false
-        //     [email] => dfsfsf
-        //     [user] => 
-        //     [domain] => dfsfsf
-        //     [mx_record] => true
-        //     [mx_domain] => true
-        //     [safe_to_send] => true
-        //     [did_you_mean] => 
-        //     [success] => true
-        //     [message] =>
+        return $error;
     }
 
 

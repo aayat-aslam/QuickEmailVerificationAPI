@@ -28,7 +28,8 @@
                     <div class="form-group">
                         <label for="email">Enter email to verify</label>
                         <input type="email" id="email" name="email" class="form-control email">
-                        <small id="showError"></small>
+                        <small style="color: red;" id="showError"></small>
+                        <small style="color: green;" id="showSuccess"></small>
                     </div>
                     <div class="form-group">
                         <button id="btnSubmit" class="btn btn-primary">Submit</button>
@@ -43,12 +44,18 @@
             $(document).ready(function(){
                 $('#btnSubmit').click(function(){
                     $.post('backend.php',{r:'verifyEmail',email:$('#email').val()},function(res){
-                        console.log(res);
                         if( res.success ) {
-
+                            $('#showError').html('');
+                            $('#showSuccess').html( res.message );
+                            setTimeout(function(){
+                                $('#email').val('');
+                                $('#showSuccess').html('');
+                                }, 4000);
                         } else {
+                            $('#showSuccess').html('');
                             $('#showError').html( res.message );
                         }
+                        console.log(res);
                     });
                 });
             });

@@ -12,7 +12,6 @@ if( empty($r) ) {
     echo json_encode($arrResponse);
     exit();
 }
-
 switch ($r) {
     case 'verifyEmail':
         $email = isset($_REQUEST['email']) ? $_REQUEST['email'] : '';
@@ -30,18 +29,10 @@ switch ($r) {
         $qev = new QuickEmailVerification( $endPoint, $apiKey );
         $response = $qev->verify($email);
 
-        // print_r( $response ); die;
-
         header($_SERVER['SERVER_PROTOCOL'] . " 200 OK");
         header('Content-Type: application/json');
         echo json_encode($response);
         exit();
-
-        break;
-
-    case 'value':
-        # code...
-        break;
     
     default:
         $arrResponse = ['success' => false, 'message' => 'no such api exists'];
@@ -49,5 +40,4 @@ switch ($r) {
         header('Content-Type: application/json');
         echo json_encode($arrResponse);
         exit();
-        break;
 }
